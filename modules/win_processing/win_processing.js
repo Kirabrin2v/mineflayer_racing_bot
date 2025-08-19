@@ -32,7 +32,10 @@ function accept_update_block(oldBlock, newBlock) {
 	}
 }
 
-function check_win(nickname) {
+function check_win(control_player) {
+	const nickname = control_player.nick
+	const start_time = control_player.start_time
+	const now_time = new Date().getTime()
 	if (winners.includes(nickname)) {
 		actions.push({
 			type: "answ",
@@ -53,7 +56,7 @@ function check_win(nickname) {
 			type: "answ",
 			content: {
 				recipient: nickname,
-				message: "Поздравляю с победой!"
+				message: `Поздравляю с победой! Вы справились за ${(now_time - start_time)/1000}с!`
 			}
 		})
 		winners.push(nickname)
@@ -66,7 +69,7 @@ function module_dialogue(module_recipient, module_sender, json_cmd) {
 		if (module_sender.module_name == "ручуп") {
 			control_player = json_cmd.data.control_player
 			if (control_player.nick) {
-				check_win(control_player.nick)
+				check_win(control_player)
 				wait_data = false;
 				return {
 					type: "module_request",

@@ -619,6 +619,11 @@ bot.on('messagestr', (message, sender, message_json) => {
 		}
 })
 
+bot.on('end', function end(reason) {
+	console.log("Закончил " + reason)
+	process.exit(-1);
+})
+
 bot.on('kicked', (reason, loggedIn) => {
 	if (reason.includes("§4§l§n  БАН  §5§m")) {
 		const bots = config.sections()

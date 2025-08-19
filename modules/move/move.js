@@ -38,7 +38,7 @@ function initialize(constants) {
 }
 let seniors = []
 
-const session_limit_time = 200000;
+const session_limit_time = 260000;
 const active_session_time = 15000;
 let bot_position = {}
 
@@ -247,7 +247,8 @@ function create_control_player(nickname, version=3) {
 	let answ;
 	control_player = {
 		nick: nickname,
-		version: version
+		version: version,
+		start_time: new Date().getTime()
 	}
 	if (version == 1) {
 		answ = "Теперь Вы управляете ботом. Не забудьте включить кейлоггер и локальный сервер"
