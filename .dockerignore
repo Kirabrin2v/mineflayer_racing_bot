@@ -1,0 +1,6 @@
+txt/config.ini
+node_modules/
+modules/**/*.db
+modules/move/checked_players.json
+modules/win_processing/winners.json
+active_nick.txt
