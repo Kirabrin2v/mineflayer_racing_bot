@@ -244,6 +244,12 @@ function clear_control_player() {
 }
 
 function create_control_player(nickname, version=3) {
+	actions.push({
+		type: "cmd",
+		content: {
+			cmd: "/shome"
+		}
+	})
 	let answ;
 	control_player = {
 		nick: nickname,
