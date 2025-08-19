@@ -44,6 +44,19 @@ let bot_position = {}
 
 let actions = []
 
+let winners = []
+actions.push({
+	type: "module_request",
+	module_sender: module_name,
+	module_recipient: "win",
+	content: {
+		type: "request",
+		cmd: "get",
+		args: ["winners"],
+	}
+		
+})
+
 const available_versions = [1,2,3]
 
 let control_player = {}
@@ -209,6 +222,17 @@ function check_active_session() {
 }
 
 function clear_control_player() {
+	actions.push({
+		type: "module_request",
+		module_sender: module_name,
+		module_recipient: "win",
+		content: {
+			type: "request",
+			cmd: "get",
+			args: ["winners"],
+		}
+	})
+
 	if (control_player.version == 3) {
 		clearInterval(control_player.interval_check)
 	}
@@ -244,30 +268,47 @@ function clear_control_player() {
 }
 
 function create_control_player(nickname, version=3) {
-	actions.push({
-		type: "cmd",
-		content: {
-			cmd: "/shome"
-		}
-	})
 	let answ;
-	control_player = {
-		nick: nickname,
-		version: version,
-		start_time: new Date().getTime()
-	}
-	if (version == 1) {
-		answ = "Теперь Вы управляете ботом. Не забудьте включить кейлоггер и локальный сервер"
+	if (winners.length >= 15) {
+		answ = "К сожалению, конкурс окончен, так как нашлось 15 победителей"
+	} else {
+		
+		actions.push({
+			type: "cmd",
+			content: {
+				cmd: "/shome"
+			}
+		})
 
-	} else if (version == 3) {
-		control_player.interval_check = setInterval(() => {
-				control_bot_with_blocks(nickname)
-			}, 1)
-		answ = "Теперь Вы управляете ботом. Необходимые цвета шерсти: бирюзоывй(взгляд), оранжевый(←), лаймовый(↑), красный(↓), фиолетовый(→), зелёный(прыжок)"
-	}
-	if (!seniors.includes(nickname)) {
-		control_player.session_limit_check = setTimeout(break_session_by_time_limit, session_limit_time)
-		control_player.session_active_check = setInterval(check_active_session, active_session_time)
+		actions.push({
+			type: "module_request",
+			module_sender: module_name,
+			module_recipient: "win",
+			content: {
+				type: "request",
+				cmd: "get",
+				args: ["winners"],
+			}
+		})
+
+		control_player = {
+			nick: nickname,
+			version: version,
+			start_time: new Date().getTime()
+		}
+		if (version == 1) {
+			answ = "Теперь Вы управляете ботом. Не забудьте включить кейлоггер и локальный сервер"
+
+		} else if (version == 3) {
+			control_player.interval_check = setInterval(() => {
+					control_bot_with_blocks(nickname)
+				}, 1)
+			answ = "Теперь Вы управляете ботом. Необходимые цвета шерсти: бирюзоывй(взгляд), оранжевый(←), лаймовый(↑), красный(↓), фиолетовый(→), зелёный(прыжок)"
+		}
+		if (!seniors.includes(nickname)) {
+			control_player.session_limit_check = setTimeout(break_session_by_time_limit, session_limit_time)
+			control_player.session_active_check = setInterval(check_active_session, active_session_time)
+		}
 	}
 	return answ
 }
@@ -275,6 +316,7 @@ function create_control_player(nickname, version=3) {
 function switch_control_player(nickname, version) {
 	let is_ok = true;
 	let answ;
+
 	if (control_player.nick == nickname) {
 		clear_control_player()
 		answ = "Управление успешно выключено"
@@ -307,6 +349,7 @@ function switch_control_player(nickname, version) {
 
 
 function cmd_processing(sender, args, cmd_parameters, valid_args) {
+	console.log(winners)
 	args = valid_args;
 	seniors = cmd_parameters.seniors
 	let answ;
@@ -328,8 +371,11 @@ function cmd_processing(sender, args, cmd_parameters, valid_args) {
 			args[0] = {"name": "version", "value": 3}
 		}
 
+	}
+	if (winners.includes(sender)) {
+		answ = "Вы уже побеждали, поэтому не можете участвовать снова"
 	} else {
-		let version = Number(args[0].value)
+		const version = Number(args[0].value)
 		if (available_versions.includes(version)) {
 			if (control_player.nick) {
 				let switch_info = switch_control_player(sender, version)
@@ -400,7 +446,9 @@ function server_answ_processing(cmd, server_answ, values, identifier, is_confirm
 function module_dialogue(module_recipient, module_sender, json_cmd) {
 	console.log("Зашло в module_dialogue move.js")
 	if (json_cmd.type == "answ") {
-		
+		if (module_sender.module_name == "win") {
+			winners = json_cmd.data.winners
+		}
 	} else if (json_cmd.type == "request") {
 		if (json_cmd.cmd == "get") {
 			let data = {}
