@@ -22,11 +22,25 @@ var bot;
 
 function initialize(constants) {
 	bot = constants.bot
+	bot.on('death', () => {
+		if (control_player.nick) {
+			actions.push({
+				type: "answ",
+				content: {
+					recipient: control_player.nick,
+					message: "Бот оказался слишком хрупким для таких манёвров. Попробуйте заново"
+				}
+			})
+		}
+		clear_control_player()
+	})
+
 }
 let seniors = []
 
-const session_limit_time = 10000//1000000;
-const active_session_time = 25000;
+const session_limit_time = 200000;
+const active_session_time = 15000;
+let bot_position = {}
 
 let actions = []
 
@@ -110,6 +124,7 @@ function control_bot_with_blocks(nickname) {
 	В зависимости от блоков, находящихся в видимой всем части инвентаря,
 	бот выполняет определённое действие
 	*/
+	let move_actions = []
 	if (bot.players[nickname] && bot.players[nickname].entity) {
 		const items = bot.players[nickname].entity.equipment
 		const id_items = items
@@ -123,36 +138,48 @@ function control_bot_with_blocks(nickname) {
 
 		if (id_items.includes(13)) {
 			bot.setControlState("jump", true)
+			move_actions.push("jump")
 		} else {
 			bot.setControlState("jump", false)
 		}
 
 		if (id_items.includes(5)) {
 			bot.setControlState("forward", true)
+			move_actions.push("forward")
 		} else {
 			bot.setControlState("forward", false)
 		}
 
 		if (id_items.includes(14)) {
 			bot.setControlState("back", true)
+			move_actions.push("back")
 		} else {
 			bot.setControlState("back", false)
 		}
 
 		if (id_items.includes(1)) {
 			bot.setControlState("left", true)
+			move_actions.push("left")
 		} else {
 			bot.setControlState("left", false)
 		}
 
 		if (id_items.includes(10)) {
 			bot.setControlState("right", true)
+			move_actions.push("right")
 		} else {
 			bot.setControlState("right", false)
 		}
 	} else {
 		bot.clearControlStates()
 	}
+	control_player.active_actions = move_actions;
+}
+
+function check_bot_food() {
+	if (bot.food != 20 && !control_player.nick) {
+		bot.chat("/swarp death")
+	} 
 }
 
 function break_session_by_time_limit() {
@@ -167,16 +194,18 @@ function break_session_by_time_limit() {
 }
 
 function check_active_session() {
-	if (control_player.active_actions == control_player.old_active_actions) {
+	const now_pos = bot.entity.position
+	if (bot_position.x == now_pos.x && bot_position.z == now_pos.z) {
 		actions.push({
 			type: "answ",
 			content: {
 				recipient: control_player.nick,
-				message: `Вы бездействовали более ${active_session_time}с, поэтому игра была прервана`
+				message: `Вы бездействовали более ${active_session_time/1000}с, поэтому игра была прервана`
 			}
 		})
 		clear_control_player()
-	}
+	} 
+	bot_position = now_pos
 }
 
 function clear_control_player() {
@@ -185,6 +214,9 @@ function clear_control_player() {
 	}
 	if (control_player.session_limit_check) {
 		clearTimeout(control_player.session_limit_check)
+	}
+	if (control_player.session_active_check) {
+		clearInterval(control_player.session_active_check)
 	}
 
 	control_player = {}
@@ -384,6 +416,7 @@ function module_dialogue(module_recipient, module_sender, json_cmd) {
 	}
 }
 
+
 function get_actions() {
 	return actions.splice(0)
 }
@@ -397,6 +430,7 @@ function diagnostic_eval (eval_expression) {
 }
 
 setInterval(update_json, 5000)
+setInterval(check_bot_food, 5000)
 
 module.exports = {module_name, initialize, diagnostic_eval, control_head, control_head_with_pixels, control_state_with_keyboard, cmd_processing, get_actions, help, server_answ_processing, module_dialogue, structure}
 
