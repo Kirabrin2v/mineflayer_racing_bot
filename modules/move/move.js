@@ -334,16 +334,14 @@ function switch_control_player(nickname, version) {
 			create_control_player(nickname, version)
 		} else {
 			is_ok = false;
+			const list_players = queue_players.map((e) => e.nickname)
 			if (queue_players.includes(nickname)) {
 				let count_queue_players = queue_players.findIndex((el) => el.nickname == nickname) + 1;
-				answ = `Вы уже стоите в очереди. Перед Вами игроков: ${count_queue_players}`
+				answ = `Вы уже стоите в очереди. Перед Вами игроков: ${count_queue_players}. Сейчас управляет: ${control_player.nick}`
 			} else {
 				let count_queue_players = queue_players.length + 1;
 				answ = `Вы не можете сейчас управлять ботом, так как это делает ${control_player.nick}. Поставил Вас в очередь. Как только она подойдёт - передам Вам управление. Игроков перед Вами: ${count_queue_players}`
-				const list_players = queue_players.map((e) => e.nickname)
-				if (!list_players.includes(nickname)) {
-					queue_players.push({nickname: nickname, version: version})
-				}
+				queue_players.push({nickname: nickname, version: version})
 			}
 		}
 	}
