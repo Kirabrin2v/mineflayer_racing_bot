@@ -335,7 +335,7 @@ function switch_control_player(nickname, version) {
 		} else {
 			is_ok = false;
 			const list_players = queue_players.map((e) => e.nickname)
-			if (queue_players.includes(nickname)) {
+			if (list_players.includes(nickname)) {
 				let count_queue_players = queue_players.findIndex((el) => el.nickname == nickname) + 1;
 				answ = `Вы уже стоите в очереди. Перед Вами игроков: ${count_queue_players}. Сейчас управляет: ${control_player.nick}`
 			} else {
