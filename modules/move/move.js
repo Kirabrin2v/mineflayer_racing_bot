@@ -340,7 +340,10 @@ function switch_control_player(nickname, version) {
 			} else {
 				let count_queue_players = queue_players.length + 1;
 				answ = `Вы не можете сейчас управлять ботом, так как это делает ${control_player.nick}. Поставил Вас в очередь. Как только она подойдёт - передам Вам управление. Игроков перед Вами: ${count_queue_players}`
-				queue_players.push({nickname: nickname, version: version})
+				const list_players = queue_players.map((e) => e.nickname)
+				if (!list_players.includes(nickname)) {
+					queue_players.push({nickname: nickname, version: version})
+				}
 			}
 		}
 	}
