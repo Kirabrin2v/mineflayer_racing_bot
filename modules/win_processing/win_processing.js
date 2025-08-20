@@ -49,7 +49,7 @@ function check_win(control_player) {
 			type: "TCA",
 			content: {
 				nick: nickname, 
-				amount: 50 ? winners.length < 5 : 25
+				amount: winners.length < 5 ? 50 : 25
 			}
 		})
 		actions.push({
