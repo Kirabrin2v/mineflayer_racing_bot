@@ -183,6 +183,9 @@ modules.load_modules([
 	["./modules/win_processing/win_processing.js"]
 ])
 
+function random_number (min_num, max_num) {
+	return Math.floor(Math.random() * (max_num - min_num + 1)) + min_num;
+}
 
 function count(array, value) {
     return array.reduce((accumulator, currentValue) => {
@@ -569,6 +572,9 @@ bot.on('messagestr', (message, sender, message_json) => {
 			].includes(message) && !password_enter) {
 			bot.chat(`/login ${bot_password}`)
 			password_enter = true;
+
+		} else if (message == "[TeslaCraft] Уже выполняется другая телепортация.") {
+			bot.chat("/hub" + random_number(1, 5))
 
 		} else if (bal_survings) {
 			now_cmd = "bal"
